@@ -26,8 +26,7 @@ public class PercolationStats {
 
     // perform trials independent experiments on an n-by-n grid
     public PercolationStats(int n, int t) {
-        if ((n != (int) n) || n < 1 || 
-            t != (int) t || t < 1) {
+        if (n < 1 || t < 1) {
             throw new java.lang.IllegalArgumentException();
         }
 

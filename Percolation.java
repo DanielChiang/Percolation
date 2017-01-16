@@ -17,102 +17,117 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 
 public class Percolation {
-    private int rowSize             = 0;
-    private int gridSize            = 0;
-    private WeightedQuickUnionUF uf = null;
-    private boolean[] hasOpened     = null;
-    private int sizeOfOpened        = 0;
-    private boolean hasPercolated   = false;
+    private int rowSize                 = 0;
+    private int gridSize                = 0;
+    private WeightedQuickUnionUF uf     = null;
+    private boolean[] hasOpened         = null;
+    private boolean[] isBottomConnected = null;
+    private int sizeOfOpened            = 0;
+    private boolean hasPercolated       = false;
     
     // create n-by-n grid, with all sites blocked
     public Percolation(int n) {
-        if ((n != (int) n) || n < 1) {
+        if (n < 1) {
             throw new java.lang.IllegalArgumentException();
         }
 
-        rowSize   = n;
-        gridSize  = n * n;
+        rowSize  = n;
+        gridSize = n * n;
 
         // 1 additional room for dummy head
-        int len   = gridSize + 1;
-        uf        = new WeightedQuickUnionUF(len);
-        hasOpened = new boolean[len];
+        int len           = gridSize + 1;
+        uf                = new WeightedQuickUnionUF(len);
+        hasOpened         = new boolean[len];
+        isBottomConnected = new boolean[len];
 
         initialPercolate();
     }
 
     public void open(int row, int col) {
-        int index = this.xyTo1D(row, col);
-        this.validate(index);
+        int index = xyTo1D(row, col);
+        validate(index);
 
-        if (!this.hasOpened[index]) {
-            this.hasOpened[index] = true;
-            ++this.sizeOfOpened;
+        if (hasOpened[index]) return;
 
-            // Top
-            if (row != 1 && this.hasOpened[index - this.rowSize]) {
-                this.uf.union(index, index - this.rowSize);
-            }
+        hasOpened[index] = true;
+        ++sizeOfOpened;
 
-            // Botton
-            if (row != this.rowSize && this.hasOpened[index + this.rowSize]) {
-                this.uf.union(index, index + this.rowSize);
-            }
+        int root;
+        int top = index - rowSize;
+        if (row != 1 && hasOpened[top]) {
+            root = uf.find(top);
+            isBottomConnected[index] |= isBottomConnected[root];
+            uf.union(index, top);
+        }
 
-            // Left
-            if (col % this.rowSize != 1 && this.hasOpened[index - 1]) {
-                this.uf.union(index, index - 1);
-            }
+        int bottom = index + rowSize;
+        if (row != rowSize && hasOpened[bottom]) {
+            root = uf.find(bottom);
+            isBottomConnected[index] |= isBottomConnected[root];
+            uf.union(index, index + rowSize);
+        }
 
-            // Right
-            if (col % this.rowSize != 0 && this.hasOpened[index + 1]) {
-                this.uf.union(index, index + 1);
-            }
+        int left = index - 1;
+        if (col % rowSize != 1 && hasOpened[left]) {
+            root = uf.find(left);
+            isBottomConnected[index] |= isBottomConnected[root];
+            uf.union(index, left);
+        }
 
-            // Check percolation here to avoid backwashing 
-            if (row == this.rowSize && this.uf.connected(0, index)) {
-                this.hasPercolated = true;
-            }
+        int right = index + 1;
+        if (col % rowSize != 0 && hasOpened[right]) {
+            root = uf.find(right);
+            isBottomConnected[index] |= isBottomConnected[root];
+            uf.union(index, right);
+        }
+
+        root = uf.find(index);
+        isBottomConnected[root] |= isBottomConnected[index];
+        
+        // Check percolation here to avoid backwashing
+        if (isBottomConnected[index] && uf.connected(0, index)) {
+            hasPercolated = true;
         }
         
     }
 
     public boolean isOpen(int row, int col) {
-        int index = this.xyTo1D(row, col);
-        this.validate(index);
+        int index = xyTo1D(row, col);
+        validate(index);
 
-        return this.hasOpened[index];
+        return hasOpened[index];
     }
 
     public boolean isFull(int row, int col) {
-        int index = this.xyTo1D(row, col);
-        this.validate(index);
+        int index = xyTo1D(row, col);
+        validate(index);
 
-        return this.isOpen(row, col) && this.uf.connected(0, index);
+        return isOpen(row, col) && uf.connected(0, index);
     }
     public int numberOfOpenSites() {
-        return this.sizeOfOpened;
+        return sizeOfOpened;
     }
 
     public boolean percolates() {
-        return this.hasPercolated;
+        return hasPercolated;
 }
 
     private void validate(int n) {
-        if (n > this.gridSize + 1) throw new java.lang.IndexOutOfBoundsException();
+        if (n > gridSize + 1) throw new java.lang.IndexOutOfBoundsException();
     }
 
     private int xyTo1D(int row, int col) {
-        return (row - 1) * this.rowSize + (col - 1) + 1;
+        return (row - 1) * rowSize + (col - 1) + 1;
     }
 
     private void initialPercolate() {
-        int len = this.rowSize  + 1;
-        // int end = this.gridSize + 1;
+        int len = rowSize  + 1;
+        int end = gridSize + 1;
 
         for (int i = 1; i < len; ++i) {
-            this.uf.union(0, i);
-            // this.uf.union(end, end - i);
+            uf.union(0, i);
+            isBottomConnected[end - i] = true;
+            // uf.union(end, end - i);
         }
     }
 
