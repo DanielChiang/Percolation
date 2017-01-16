@@ -20,8 +20,8 @@ import edu.princeton.cs.algs4.StdOut;
 
 
 public class PercolationStats {
-    private int trails  = 0;
     private int size;
+    private int trails;
     private double[] means = null;
 
     // perform trials independent experiments on an n-by-n grid
@@ -30,8 +30,8 @@ public class PercolationStats {
             throw new java.lang.IllegalArgumentException();
         }
 
-        trails = t;
         size   = n * n;
+        trails = t;
         means  = new double[t];
 
         for (int i = 0; i < t; ++i) {
@@ -42,26 +42,26 @@ public class PercolationStats {
                 pc.open(row, col);
             } while (!pc.percolates());
 
-            means[i] = (double) pc.numberOfOpenSites() / this.size;
+            means[i] = (double) pc.numberOfOpenSites() / size;
         }
     }
 
     // sample mean of percolation threshold
     public double mean() {
-        return StdStats.mean(this.means);
+        return StdStats.mean(means);
     }
 
     // sample standard deviation of percolation threshold                    
     public double stddev() {
-        return StdStats.stddev(this.means);
+        return StdStats.stddev(means);
     }
 
     public double confidenceLo() {
-        return this.mean() - (1.96 * Math.sqrt(this.stddev()) / Math.sqrt(this.size));
+        return mean() - (1.96 * stddev() / Math.sqrt(trails));
     }
 
     public double confidenceHi() {
-        return this.mean() + (1.96 * Math.sqrt(this.stddev()) / Math.sqrt(this.size));
+        return mean() + (1.96 * stddev() / Math.sqrt(trails));
     }
 
     public static void main(String[] args) {
