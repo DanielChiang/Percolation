@@ -44,8 +44,8 @@ public class Percolation {
     }
 
     public void open(int row, int col) {
+        validate(row, col);
         int index = xyTo1D(row, col);
-        validate(index);
 
         if (hasOpened[index]) return;
 
@@ -92,16 +92,14 @@ public class Percolation {
     }
 
     public boolean isOpen(int row, int col) {
+        validate(row, col);
         int index = xyTo1D(row, col);
-        validate(index);
-
         return hasOpened[index];
     }
 
     public boolean isFull(int row, int col) {
+        validate(row, col);
         int index = xyTo1D(row, col);
-        validate(index);
-
         return isOpen(row, col) && uf.connected(0, index);
     }
     public int numberOfOpenSites() {
@@ -112,8 +110,10 @@ public class Percolation {
         return hasPercolated;
 }
 
-    private void validate(int n) {
-        if (n > gridSize) throw new java.lang.IndexOutOfBoundsException();
+    private void validate(int row, int col) {
+        if (row < 1 || row > rowSize ||
+            col < 1 || col > rowSize) 
+            throw new java.lang.IndexOutOfBoundsException();
     }
 
     private int xyTo1D(int row, int col) {
@@ -131,6 +131,5 @@ public class Percolation {
         }
     }
 
-    public static void main(String[] args) {
-    }
+    public static void main(String[] args) { }
 }
