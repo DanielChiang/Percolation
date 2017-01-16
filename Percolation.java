@@ -83,7 +83,7 @@ public class Percolation {
 
         root = uf.find(index);
         isBottomConnected[root] |= isBottomConnected[index];
-        
+
         // Check percolation here to avoid backwashing
         if (isBottomConnected[index] && uf.connected(0, index)) {
             hasPercolated = true;
@@ -113,7 +113,7 @@ public class Percolation {
 }
 
     private void validate(int n) {
-        if (n > gridSize + 1) throw new java.lang.IndexOutOfBoundsException();
+        if (n > gridSize) throw new java.lang.IndexOutOfBoundsException();
     }
 
     private int xyTo1D(int row, int col) {
